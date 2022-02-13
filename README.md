@@ -1,4 +1,6 @@
 # Fast 2D Convolution
+[<img src="https://img.shields.io/badge/FFTW-3.3.5-76B900?style=for-the-badge" style="vertical-align:top margin:6px 4px">](http://www.fftw.org/install/windows.html)
+
 Implementation of 2D convolution using Fast Fourier Transformation (FFT). Convolution in time space is equal to multiplication in Frequency space. 
 
 ![formula](https://render.githubusercontent.com/render/math?math=\huge\color{Red}f(x,y)*h(x,y)=F(u,v).H(u,v))
@@ -6,6 +8,20 @@ Implementation of 2D convolution using Fast Fourier Transformation (FFT). Convol
 This equation is expressed below.
 
 <img src="https://www.programmersought.com/images/174/b9c351b333914cf23ff3aa43d2049a36.png" width = "700" height = "325">
+
+## Run
+
+The FFTW3 library in external_lib is compiled for Windows. For Ubuntu, FFTW 3.3.5 should be installed.  
+Run steps for Windows: 
+```shell
+mkdir build && cd build
+copy ..\external_lib\fftw-3.3.5-dll64\libfftw3f-3.dll .
+cmake ..
+make
+```
+
+***Or run with Clion***  
+**Note**: A copy of libfftw3f-3.dll must be in the executable directory
 
 ## Defined Convulation Skils
 :white_check_mark: ***full***: (default) returns the full 2-D convolution  

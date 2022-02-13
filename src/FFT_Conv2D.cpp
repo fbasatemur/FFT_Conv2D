@@ -1,8 +1,8 @@
-#include "FFT_Conv2D.h"
+#include "../include/FFT_Conv2D.h"
 #include <iostream>
 #include <math.h>
-#include "Process.h"
-
+#include <string.h>
+#include "../include/fftwf_.h"
 
 struct Output {
 	float* pInput;
@@ -124,13 +124,25 @@ float* FFTConv2D(const float* input, int inputWidth, int inputHeight, const floa
 	int outWidth = outputs->outWidth;
 	int outSize2D = outWidth * outHeight;
 
-	float* m1_OR = new float[outSize2D];
-	float* m1_OI = new float[outSize2D];
-	float* m2_OR = new float[outSize2D];
-	float* m2_OI = new float[outSize2D];
+    float* zero_filled_imag = new float[outSize2D]();
 
-	FFT2D(outputs->pInput, m1_OR, m1_OI, outWidth, outHeight);
-	FFT2D(outputs->pKernel, m2_OR, m2_OI, outWidth, outHeight);
+    float* m1_out_real = new float[outSize2D];
+    float* m1_out_imag = new float[outSize2D];
+    float* m2_out_real = new float[outSize2D];
+    float* m2_out_imag = new float[outSize2D];
+
+    // create fft plan (this process only created once because it's slow)
+    FFTWF* complexFFT = FFTWF_Factory::Complex::_2D::Create(outHeight, outWidth);
+
+    // input values set for fft calculate
+    complexFFT->Forward()->SetIn(outputs->pInput, zero_filled_imag);
+    complexFFT->Forward()->Execute();
+    complexFFT->Forward()->GetOut(m1_out_real, m1_out_imag);
+
+    // kernel values set for fft calculate
+    complexFFT->Forward()->SetIn(outputs->pKernel, zero_filled_imag);
+    complexFFT->Forward()->Execute();
+    complexFFT->Forward()->GetOut(m2_out_real, m2_out_imag);
 
 	delete[] outputs->pInput;
 	delete[] outputs->pKernel;
@@ -139,19 +151,22 @@ float* FFTConv2D(const float* input, int inputWidth, int inputHeight, const floa
 	float* multReal = new float[outSize2D];
 	float* multImag = new float[outSize2D];
 
-	ComplexMult(m1_OR, m1_OI, m2_OR, m2_OI, multReal, multImag, outWidth, outHeight);
+	ComplexMult(m1_out_real, m1_out_imag, m2_out_real, m2_out_imag, multReal, multImag, outWidth, outHeight);
 
-	delete[] m1_OR, delete[] m1_OI;
-	delete[] m2_OR, delete[] m2_OI;
+	delete[] m1_out_real, delete[] m1_out_imag;
+	delete[] m2_out_real, delete[] m2_out_imag;
 
 	float* outReal = new float[outSize2D];
 	float* outImag = new float[outSize2D];
-	IFFT2D(outReal, outImag, multReal, multImag, outWidth, outHeight);
+
+    complexFFT->Backward()->SetIn(multReal, multImag);
+    complexFFT->Backward()->Execute();
+    complexFFT->Backward()->GetOut(outReal, outImag);
 
 	delete[] multReal, delete[] multImag;
-	delete[] outImag;
+	delete[] outImag, delete complexFFT;
 
-	float* ret = NULL;
+	float* ret = nullptr;
 
 	if (!strcmp(shape, "full"))
 	{
