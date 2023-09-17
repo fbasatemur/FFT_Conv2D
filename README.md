@@ -34,4 +34,4 @@ make
 
 ## Result
 This process may faster than Time Domain Convolution. When using large images (exp: 1024 x 1024 or 512 x 512 etc.) is about 2 times faster than Time Domain Convolution. This measurement is based on trial and error, you should observe speed up yourself.  
-Example usage of FFTConv2D() function is specified in <a href="https://github.com/fbasatemur/FFT_Conv2D/blob/main/FFT_Fast_Convolution/main.cpp"> main</a>.
+Example usage of FFTConv2D() function is specified in <a href="https://github.com/fbasatemur/FFT_Conv2D/blob/main/main.cpp"> main</a>.
